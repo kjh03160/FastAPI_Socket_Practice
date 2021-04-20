@@ -39,6 +39,7 @@ class User(Base):
     login_id = Column(String(50), unique=True, nullable=False)
     username = Column(postgresql.UUID(as_uuid=True), default=gen_username, unique=True)
     password = Column(String(128), nullable=False)
+    nickname = Column(String(30), nullable=True)
 
     # # last_message foreign key
     # # use_alter=True along with name='' adds this foreign key after message has been created to avoid circular dependency
@@ -81,3 +82,5 @@ class ChattingRoom(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50))
+    create_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    create_user = relationship("User", backref="create_rooms", foreign_keys=create_user_id)
