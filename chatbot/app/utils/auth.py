@@ -1,4 +1,4 @@
-from fastapi import Depends, status
+from fastapi import Depends, status, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
@@ -66,7 +66,7 @@ def authenticate_user(db: Session, login_id: str, password: str):
     return data
 
 
-async def get_current_user(db: Session, token: str = Depends(oauth2_scheme)):
+async def get_current_user(db: Session = None, token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -78,13 +78,26 @@ async def get_current_user(db: Session, token: str = Depends(oauth2_scheme)):
         login_id: str = payload.get("login_id")
         if login_id is None:
             raise credentials_exception
-    except JWTError as e:
+    except JWTError as e:  
         print(e)
         raise credentials_exception
-    user = get_user(db, login_id=login_id)
-    if user is None:
-        raise credentials_exception
+    if db:
+        user = get_user(db, login_id=login_id)
+        if user is None:
+            raise credentials_exception
     return UserPrivacySchema(**jsonable_encoder(user))
+
+
+async def get_user_id(authorization: str = Header(...)) -> int:
+    if authorization:
+        payload = decode_jwt(authorization)
+        check_expired(payload['exp'])
+        return payload['id']
+
+
+async def get_user_obj_by_id(db: Session, user_id: int) -> object:
+    user = db.query(User).get(user_id)
+    return user
 
 
 def decode_jwt(token: str = Depends(oauth2_scheme)):

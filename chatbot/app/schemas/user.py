@@ -37,6 +37,10 @@ class UserDisplaySchema(BaseModel):
 class UserPrivacySchema(UserDisplaySchema):
     id: int
     login_id: str
+    nickname: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
 
 
 class UserToken(BaseModel):

@@ -36,5 +36,5 @@ async def get_user_privacy(db: Session, request: Request):
     return Response("Token doesn't exist", status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-async def refresh(request: Request):
-    return await refresh_expired_access_token(request.headers['authorization'])
+async def refresh(refresh_token: str):
+    return await refresh_expired_access_token(refresh_token)
