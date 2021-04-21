@@ -10,6 +10,7 @@ class LoginSchema(BaseModel):
 
 
 class SignupSchema(LoginSchema):
+    nickname: Optional[str] = ""
     password_2: str
 
     class Config:
@@ -27,7 +28,7 @@ class UserSchema(BaseModel):
     username: str
     id: int
     login_id: str
-    password: str
+    # password: str
 
 
 class UserDisplaySchema(BaseModel):

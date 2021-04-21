@@ -13,7 +13,7 @@ from app.utils.auth import get_password_hash, authenticate_user, get_current_use
 
 async def create_user(db: Session, data: schemas.SignupSchema):
     if data.password == data.password_2:
-        hashed_pw = await get_password_hash(data.password_1)
+        hashed_pw = get_password_hash(data.password)
         user = models.User(login_id=data.login_id, password=hashed_pw)
         db.add(user)
         db.commit()
