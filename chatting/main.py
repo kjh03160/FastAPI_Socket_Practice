@@ -10,7 +10,7 @@ from app.database import app, get_db_sess, open_database_connection_pools, close
 from app.connetion_manager import manager
 from app import schemas
 from app import crud
-from app.apis import chat_room, user
+from app.apis import chat_room, user, message
 
 from redis import Redis
 import uvicorn, json
@@ -55,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 # async def get(id: int):
 #     return HTMLResponse(html % id)
 
-
+app.include_router(message.router, prefix="/chat-room/{room_id}")
 app.include_router(chat_room.router)
 
 if __name__ == "__main__":
