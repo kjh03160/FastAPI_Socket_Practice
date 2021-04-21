@@ -11,7 +11,10 @@ from app import schemas
 from app import crud
 from app.utils.auth import check_expired, get_user_id
 
-router = InferringRouter()
+router = InferringRouter(
+    tags=["chat-rooms"],
+    responses={404: {"description": "Not found"}},
+)
 
 
 @cbv(router)

@@ -39,7 +39,7 @@ async def create_chatting_room(reqeust: Request, db: Session, data: schemas.Crea
 
 
 async def delete_chatting_room(request: Request, db: Session, room_id: int):
-    chatroom = db.query(models.ChattingRoom).get(data.id)
+    chatroom = db.query(models.ChattingRoom).get(room_id)
     db.delete(chatroom)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -54,5 +54,3 @@ async def update_chatting_room(request: Request, db: Session, data: schemas.Upda
     db.add(room)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-    
-    
