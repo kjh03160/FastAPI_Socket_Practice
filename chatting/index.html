@@ -25,7 +25,6 @@
                 message.appendChild(content);
                 messages.appendChild(message);
             }
-
             ws.onmessage = processMessage;
 
             function sendMessage(event) {
@@ -36,8 +35,8 @@
                 var content = document.createTextNode(input.value)
                 message.appendChild(content);
                 messages.appendChild(message);
-                console.log([to.value, input.value])
-                ws.send([to.value, input.value]);
+                console.log([clientID, input.value])
+                ws.send(JSON.stringify({"message":input.value, "room_id": parseInt(clientID)}));
 
                 input.value = ''
                 event.preventDefault()
