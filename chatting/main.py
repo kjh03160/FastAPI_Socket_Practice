@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from typing import List, Dict, AsyncIterable, Optional
 
-from app import schemas, crud
+from app import schemas, crud, middleware
 from app.database import app, get_db_sess, open_database_connection_pools, close_database_connection_pools
 from app.connetion_manager import manager
 from app.apis import chat_room, user, message
@@ -15,6 +15,8 @@ from redis import Redis
 import uvicorn, json, starlette
 import logging
 
+app.add_middleware(middleware.AuthenticationMiddleware, backend=middleware.BasicAuthBackend())
+app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=["*"])
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
