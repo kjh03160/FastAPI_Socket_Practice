@@ -1,6 +1,8 @@
 from typing import AsyncIterable, Optional
 
 from fastapi import Depends, FastAPI
+from fastapi_utils.api_settings import get_api_settings
+
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine as Database
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,15 +10,11 @@ from sqlalchemy.orm import Session
 
 from app.settings import DATABASE_URL
 
-from fastapi_utils.api_settings import get_api_settings
-
-
 def get_app() -> FastAPI:
     get_api_settings.cache_clear()
     settings = get_api_settings()
     settings.debug = True
     app = FastAPI(**settings.fastapi_kwargs)
-    # <Typically, you would include endpoint routers here>
     return app
 
 app = get_app()
