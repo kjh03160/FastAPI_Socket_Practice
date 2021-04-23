@@ -11,7 +11,7 @@ from typing import Optional, Dict
 from calendar import timegm
 
 from app.settings import JWT_SETTING
-from app.models import User
+from app import models
 from app.schemas import Token, UserSchema, UserDisplaySchema, UserToken, UserPrivacySchema
 
 
@@ -29,7 +29,7 @@ def get_password_hash(password):
 
 
 def get_user(db: Session, login_id: str):
-    user = db.query(User).filter_by(login_id=login_id).first()
+    user = db.query(models.User).filter_by(login_id=login_id).first()
     if user:
         user_dict = jsonable_encoder(user)
     return UserSchema(**user_dict)
@@ -60,7 +60,7 @@ def authenticate_user(db: Session, login_id: str, password: str):
     if not verify_password(password, user.password):
         return False
     user = jsonable_encoder(user)
-    access_jwt, refresh_jwt = create_token(UserSchema(**user))
+    access_jwt, refresh_jwt = create_token(UserPrivacySchema(**user))
     data = UserToken(access_token=access_jwt, refresh_token=refresh_jwt).dict()
     data.update({'username': user['username']})
     return data
@@ -96,7 +96,7 @@ async def get_user_id(authorization: str = Header(...)) -> int:
 
 
 async def get_user_obj_by_id(db: Session, user_id: int) -> object:
-    user = db.query(User).get(user_id)
+    user = db.query(models.User).get(user_id)
     return user
 
 

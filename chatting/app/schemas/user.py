@@ -28,7 +28,7 @@ class UserSchema(BaseModel):
     username: str
     id: int
     login_id: str
-    # password: str
+    password: str
 
 
 class UserDisplaySchema(BaseModel):
