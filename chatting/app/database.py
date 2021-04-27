@@ -17,7 +17,7 @@ def get_app() -> FastAPI:
     app = FastAPI(**settings.fastapi_kwargs)
     return app
 
-app = get_app()
+application = app = get_app()
 
 _db_conn: Optional[Database]
 
