@@ -2,7 +2,8 @@ from sqlalchemy import Column, Integer, String, UniqueConstraint, Enum, ForeignK
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import Date, DateTime, Text, Boolean, SmallInteger
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Query
+from datetime import datetime
 
 import uuid
 import enum
@@ -31,6 +32,11 @@ users = Table('user_room_r',
     Column('room_id', Integer, ForeignKey('chatting_rooms.id'), primary_key=True)
 )
 
+friendship = Table(
+    'friendships', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('friend_id', Integer, ForeignKey('users.id'), primary_key=True),
+    UniqueConstraint('user_id', 'friend_id', name='unique_friendships'))
 
 class User(Base):
     __tablename__ = "users"
@@ -50,12 +56,26 @@ class User(Base):
     # # last_message - message one-to-one relationship
     # # set post_update=True to avoid circular dependency during
     # last_message = relationship("Message", backref="+", uselist=False, foreign_keys=last_message_id, post_update=True)
+    friends = relationship('User',
+                           secondary=friendship,
+                           primaryjoin=id == friendship.c.user_id,
+                           secondaryjoin=id == friendship.c.friend_id)
 
     rooms = relationship('ChattingRoom',secondary=users, backref='users')
 
     create_dt = Column(DateTime(timezone=True), server_default=func.now())
     update_dt = Column(DateTime(timezone=True), onupdate=func.now(), default=func.now())
     
+    def add_friend(self, friend: Query) -> None:
+        if friend not in self.friends:
+            self.friends.append(friend)
+            friend.friends.append(self)
+
+    def delete_friend(self, friend: Query) -> None:
+        if friend in self.friends:
+            self.friends.remove(friend)
+            friend.friends.remove(self)
+
 
 class Message(Base):
     __tablename__ = "messages"
@@ -76,6 +96,13 @@ class Message(Base):
     create_dt = Column('create_dt', DateTime(timezone=True),  server_default=func.now())
     read_dt = Column('read_dt', DateTime(timezone=True), nullable=True)
 
+    def read_message(self, user: Query) -> None:
+        if user.id == receiver_id:
+            self.read_dt = datetime.now()
+            self.is_read = True
+        else:
+            raise Exception("not user's message")
+        
 
 class ChattingRoom(Base):
     __tablename__ = "chatting_rooms"
