@@ -11,7 +11,6 @@ from app import schemas, crud, middleware
 from app.database import app, get_db_sess, open_database_connection_pools, close_database_connection_pools
 from app.connetion_manager import manager
 from app.apis import chat_room, user, message, friend
-from redis import Redis
 import uvicorn, json, starlette
 import logging
 
@@ -30,9 +29,6 @@ async def startup_event():
 @app.on_event('shutdown')
 async def shutdown_event():
     await close_database_connection_pools()
-
-redis = Redis.from_url('redis://localhost:6379')
-
 
 # @app.websocket("/ws/{room_id}")
 # class MessagesEndpoint(WebSocketEndpoint):
@@ -79,7 +75,7 @@ async def get(request: Request, id: int):
 
 app.include_router(message.router, prefix="/chat-room/{room_id}")
 app.include_router(chat_room.router)
-app.include_router(friend.router, prefix='/friends')
+app.include_router(friend.router, prefix='/{user_id}/friends')
 
 
 if __name__ == "__main__":
