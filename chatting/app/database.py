@@ -12,7 +12,7 @@ from app.settings import DATABASE_URL
 
 import logging
 
-logging.basicConfig()
+logging.basicConfig(format='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 def get_app() -> FastAPI:
