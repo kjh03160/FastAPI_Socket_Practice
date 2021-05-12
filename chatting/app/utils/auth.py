@@ -61,7 +61,7 @@ def destroy_token(token: str) -> None:
     expire_time = datetime.fromtimestamp(token)
     remain_time = expire_time - datetime.now()
     
-    redis.setex(f'{payload['username']} expired: ', remain_time.seconds, token)
+    redis.setex(f'{payload["username"]} expired: ', remain_time.seconds, token)
 
 
 def destroied_token_check(username: str) -> None:
