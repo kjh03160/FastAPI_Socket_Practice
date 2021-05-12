@@ -1,4 +1,4 @@
 from redis import Redis
+from app.settings import REDIS_URL
 
-
-redis = Redis.from_url('redis://localhost:6379')
+redis = Redis.from_url(REDIS_URL)

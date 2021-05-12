@@ -9,6 +9,8 @@ DEFAULT_DATABASES = {
     "NAME": os.getenv('DB_NAME')
 }
 
+REDIS_URL = os.getenv('REDIS_URL')
+
 JWT_SETTING = {
     "SECRET_KEY": "73cb0d7d6240187d6d33df85480daf3994b011828e8db3c18a970c7095cee578",
     "ALGORITHM": "HS256",
