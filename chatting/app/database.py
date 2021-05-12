@@ -10,6 +10,11 @@ from sqlalchemy.orm import Session
 
 from app.settings import DATABASE_URL
 
+import logging
+
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 def get_app() -> FastAPI:
     get_api_settings.cache_clear()
     settings = get_api_settings()
