@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from fastapi import BackgroundTasks, status, Request
+from fastapi import BackgroundTasks, status, Request, HTTPException
 from fastapi.responses import JSONResponse, Response
 from fastapi.param_functions import Query
 
@@ -26,7 +26,9 @@ async def get_chatting_room_list(request: Request, db: Session, user_id: int):
 
 async def get_chatting_room_detail(request: Request, db: Session, room_id: int, user_id: int):
     room = db.query(models.ChattingRoom).get(room_id)
-    return schemas.ChatRoomAbstract(**jsonable_encoder(room), users=[user.nickname for user in room.users])
+    if room:
+        return schemas.ChatRoomAbstract(**jsonable_encoder(room), users=[user.nickname for user in room.users])
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 async def create_chatting_room(reqeust: Request, db: Session, data: schemas.CreateChatRoomSchema, user_id: int):

@@ -14,25 +14,23 @@ from app.utils.auth import get_password_hash, authenticate_user, get_current_use
 async def create_user(db: Session, data: schemas.SignupSchema):
     if data.password == data.password_2:
         hashed_pw = get_password_hash(data.password)
-        user = models.User(login_id=data.login_id, password=hashed_pw)
+        user = models.User(login_id=data.login_id, password=hashed_pw, nickname=data.nickname)
         db.add(user)
         db.commit()
         db.refresh(user)
         return jsonable_encoder(user)
-    return Response("Password doesn't match", status_code=400)
 
 
 async def login_user(db: Session, data: schemas.LoginSchema):
     user = authenticate_user(db, **data.dict())
     if user:
         return user
-    return Response("Permission Denied", status_code=401)
 
 
 async def get_user_privacy(db: Session, request: Request):
     token = request.headers.get('authorization', None)
     if token:
-        return await get_current_user(db, token)
+        return await get_current_user(request, db, token)
     return Response("Token doesn't exist", status_code=status.HTTP_401_UNAUTHORIZED)
 
 

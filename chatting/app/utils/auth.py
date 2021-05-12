@@ -1,10 +1,10 @@
-from fastapi import Depends, status, Header
+from fastapi import Depends, status, Header, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, subqueryload, selectinload, lazyload
 
 from datetime import datetime, timedelta
 from typing import Optional, Dict
@@ -35,7 +35,7 @@ def get_user(db: Session, login_id: str):
     return UserSchema(**user_dict)
 
 
-def create_token(data: UserDisplaySchema) -> Dict[str, UserToken]:
+def create_token(data: UserPrivacySchema) -> Dict[str, UserToken]:
     access_to_encode = data.dict() if not isinstance(data, dict) else data
     refresh_to_encode = access_to_encode.copy()
     expire = datetime.utcnow() + JWT_SETTING['ACCESS_TOKEN_EXPIRE']
@@ -66,26 +66,27 @@ def authenticate_user(db: Session, login_id: str, password: str):
     return data
 
 
-async def get_current_user(db: Session = None, token: str = Depends(oauth2_scheme)):
+async def get_current_user(request: Request, db: Session = None, token: str = Depends(oauth2_scheme), user_id: int = None):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        payload = decode_jwt(token)
-        check_expired(payload['exp'])
-        login_id: str = payload.get("login_id")
-        if login_id is None:
+    if user_id:
+        return db.query(models.User).get(user_id)
+    else:
+        try:
+            payload = decode_jwt(token)
+            check_expired(payload['exp'])
+            login_id: str = payload.get("login_id")
+            if login_id is None:
+                raise credentials_exception
+        except JWTError as e:  
+            print(e)
             raise credentials_exception
-    except JWTError as e:  
-        print(e)
-        raise credentials_exception
-    if db:
-        user = get_user(db, login_id=login_id)
-        if user is None:
-            raise credentials_exception
-    return UserPrivacySchema(**jsonable_encoder(user))
+        return db.query(models.User).get(payload.get('id'))
+    # if request.user and request.user.id == payload.get('id'):
+    #     return UserPrivacySchema(**jsonable_encoder(request.user))
 
 
 async def get_user_id(authorization: str = Header(...)) -> int:
@@ -101,7 +102,8 @@ async def get_user_obj_by_id(db: Session, user_id: int) -> object:
 
 
 def decode_jwt(token: str = Depends(oauth2_scheme)):
-    token = token.split()[1]
+    if token.startswith('Bearer'):
+        token = token.split()[1]
     payload = jwt.decode(token, JWT_SETTING['SECRET_KEY'], algorithms=[JWT_SETTING['ALGORITHM']], options={"verify_exp": False})
     return payload
 

@@ -22,6 +22,8 @@ class Token(BaseModel):
     refresh_exp: Any
     login_id: str
     id: int
+    nickname: Optional[str] = None
+    username: str
 
 
 class UserSchema(BaseModel):
@@ -33,13 +35,14 @@ class UserSchema(BaseModel):
 
 class UserDisplaySchema(BaseModel):
     username: Optional[str]
+    nickname: Optional[str]
     
 
 class UserPrivacySchema(UserDisplaySchema):
     id: int
     login_id: str
     nickname: Optional[str] = None
-    
+    username: str
     class Config:
         orm_mode = True
 
