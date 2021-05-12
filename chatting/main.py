@@ -10,13 +10,14 @@ from typing import List, Dict, AsyncIterable, Optional
 from app import schemas, crud, middleware
 from app.database import app, get_db_sess, open_database_connection_pools, close_database_connection_pools
 from app.connetion_manager import manager
-from app.apis import chat_room, user, message
+from app.apis import chat_room, user, message, friend
 from redis import Redis
 import uvicorn, json, starlette
 import logging
 
-app.add_middleware(middleware.AuthenticationMiddleware, backend=middleware.BasicAuthBackend())
+# app.add_middleware(middleware.AuthenticationMiddleware, backend=middleware.BasicAuthBackend())
 app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=["*"])
+app.add_middleware(middleware.CORSMiddleware, allow_credentials=True, allow_headers=["*"], allow_methods=["*"])
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,7 +57,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int):
         while True:
 
             data = await websocket.receive_json()
-            print(data)
             
             # await manager.broadcast(f"Client {client_id}: {data}")
             await manager.send_message(websocket, data)
@@ -74,11 +74,12 @@ with open('index.html', 'r') as f:
 
 @app.get("/{id}")
 async def get(request: Request, id: int):
-    print(request.user)
+    # print(request.user)
     return HTMLResponse(html % id)
 
 app.include_router(message.router, prefix="/chat-room/{room_id}")
 app.include_router(chat_room.router)
+app.include_router(friend.router, prefix='/friends')
 
 
 if __name__ == "__main__":

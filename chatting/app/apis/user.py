@@ -6,7 +6,7 @@ from app.database import app, get_db_sess
 from app import crud, schemas
 
 
-@app.post("/signup", response_model=schemas.UserSchema)
+@app.post("/signup", response_model=schemas.UserPrivacySchema)
 async def signup(data: schemas.SignupSchema, db: Session = Depends(get_db_sess)):
     try:
         user = await crud.create_user(db, data)
