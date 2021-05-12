@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, UniqueConstraint, Enum, ForeignK
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import Date, DateTime, Text, Boolean, SmallInteger
-from sqlalchemy.orm import relationship, backref, Query
+from sqlalchemy.orm import relationship, backref, Query, mapper
 from datetime import datetime
 
 import uuid
@@ -38,6 +38,14 @@ friendship = Table(
     Column('friend_id', Integer, ForeignKey('users.id'), primary_key=True),
     UniqueConstraint('user_id', 'friend_id', name='unique_friendships'))
 
+
+class FriendshipMapper(object):
+    pass
+
+
+mapper(FriendshipMapper, friendship)
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -66,15 +74,19 @@ class User(Base):
     create_dt = Column(DateTime(timezone=True), server_default=func.now())
     update_dt = Column(DateTime(timezone=True), onupdate=func.now(), default=func.now())
     
-    def add_friend(self, friend: Query) -> None:
+    def add_friend(self, friend: Query) -> bool:
         if friend not in self.friends:
             self.friends.append(friend)
             friend.friends.append(self)
+            return True
+        return False
 
-    def delete_friend(self, friend: Query) -> None:
+    def delete_friend(self, friend: Query) -> bool:
         if friend in self.friends:
             self.friends.remove(friend)
             friend.friends.remove(self)
+            return True
+        return False
 
 
 class Message(Base):
