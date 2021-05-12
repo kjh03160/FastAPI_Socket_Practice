@@ -13,6 +13,7 @@ from calendar import timegm
 from app.settings import JWT_SETTING
 from app import models
 from app.schemas import Token, UserSchema, UserDisplaySchema, UserToken, UserPrivacySchema
+from app.utils.modules import redis
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -51,6 +52,21 @@ def create_token(data: UserPrivacySchema) -> Dict[str, UserToken]:
     refresh_jwt = jwt.encode(refresh_token.dict(), JWT_SETTING['SECRET_KEY'], algorithm=JWT_SETTING['ALGORITHM'])
 
     return access_jwt, refresh_jwt
+
+
+def destroy_token(token: str) -> None:
+    payload = decode_jwt(token)
+    destroied_token_check(payload['username'])
+    
+    expire_time = datetime.fromtimestamp(token)
+    remain_time = expire_time - datetime.now()
+    
+    redis.setex(f'{payload['username']} expired: ', remain_time.seconds, token)
+
+
+def destroied_token_check(username: str) -> None:
+    if redis.get(f'{username} expired: '):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Logged out token")
 
 
 def authenticate_user(db: Session, login_id: str, password: str):
@@ -92,6 +108,8 @@ async def get_current_user(request: Request, db: Session = None, token: str = De
 async def get_user_id(authorization: str = Header(...)) -> int:
     if authorization:
         payload = decode_jwt(authorization)
+        token = authorization.split("Bearer ")[1] if authorization.startswith("Bearer ") else authorization
+        destroied_token_check(payload['username'])
         check_expired(payload['exp'])
         return payload['id']
 

@@ -9,7 +9,8 @@ from fastapi import Request
 from typing import Dict
 
 from app import models, schemas
-from app.utils.auth import get_password_hash, authenticate_user, get_current_user, refresh_expired_access_token
+from app.utils.auth import get_password_hash, authenticate_user, get_current_user, refresh_expired_access_token, \
+                            destroy_token
 
 async def create_user(db: Session, data: schemas.SignupSchema):
     if data.password == data.password_2:
@@ -36,3 +37,6 @@ async def get_user_privacy(db: Session, request: Request):
 
 async def refresh(refresh_token: str):
     return await refresh_expired_access_token(refresh_token)
+
+async def logout(request: Request, authorization: str) -> None:
+    destroy_token(authorization)
