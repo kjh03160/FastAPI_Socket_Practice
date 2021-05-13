@@ -39,4 +39,4 @@ async def refresh(refresh_token: str):
     return await refresh_expired_access_token(refresh_token)
 
 async def logout(request: Request, authorization: str) -> None:
-    destroy_token(authorization)
+    await destroy_token(authorization)
