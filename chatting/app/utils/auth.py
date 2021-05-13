@@ -56,7 +56,7 @@ def create_token(data: UserPrivacySchema) -> Dict[str, UserToken]:
 
 def destroy_token(token: str) -> None:
     payload = decode_jwt(token)
-    destroied_token_check(payload['username'])
+    destroied_token_check(payload['username'], token)
     
     expire_time = datetime.fromtimestamp(payload['exp'])
     remain_time = expire_time - datetime.now()
@@ -64,8 +64,8 @@ def destroy_token(token: str) -> None:
     redis.setex(f'{payload["username"]} expired: ', remain_time.seconds, token)
 
 
-def destroied_token_check(username: str) -> None:
-    if redis.get(f'{username} expired: '):
+def destroied_token_check(username: str, access_token: str) -> None:
+    if redis.get(f'{username} expired: ') == access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Logged out token")
 
 
