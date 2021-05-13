@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from datetime import date as DATE
 from pydantic import BaseModel
 
+from app.settings import TIMEZONE
 from .base import PaginationSchema
 from .user import UserPrivacySchema
 
@@ -12,8 +13,8 @@ class MessageCreateSchema(BaseModel):
     sender_id: Optional[int] = None
     receiver_id: Optional[int] = None
     content: str
-    create_dt: Optional[DATE] = datetime.now()
-    read_dt: Optional[DATE] = datetime.now()
+    create_dt: Optional[DATE] = datetime.now(TIMEZONE)
+    read_dt: Optional[DATE] = datetime.now(TIMEZONE)
 
     class Config:
         orm_mode = True
