@@ -2,6 +2,7 @@ from fastapi import Depends, Path, Request, status, Response, WebSocket, \
                     BackgroundTasks, Body
 from fastapi.responses import HTMLResponse
 from starlette.endpoints import WebSocketEndpoint
+from fastapi.logger import logger
 
 from sqlalchemy.orm import Session
 
@@ -18,8 +19,10 @@ import logging
 app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=["*"])
 app.add_middleware(middleware.CORSMiddleware, allow_credentials=True, allow_headers=["*"], allow_methods=["*"])
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(format='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+gunicorn_logger = logging.getLogger('gunicorn.error')
+logger.handlers = gunicorn_logger.handlers
 
 @app.on_event('startup')
 async def startup_event():
@@ -70,11 +73,11 @@ with open('index.html', 'r') as f:
 
 @app.get("/")
 async def logging_check():
-    app.logger.debug("I'm a DEBUG message")
-    app.logger.info("I'm an INFO message")
-    app.logger.warning("I'm a WARNING message")
-    app.logger.error("I'm a ERROR message")
-    app.logger.critical("I'm a CRITICAL message")
+    logger.debug("I'm a DEBUG message")
+    logger.info("I'm an INFO message")
+    logger.warning("I'm a WARNING message")
+    logger.error("I'm a ERROR message")
+    logger.critical("I'm a CRITICAL message")
 
 @app.get("/{id}")
 async def get(request: Request, id: int):
@@ -87,8 +90,6 @@ app.include_router(friend.router, prefix='/{user_id}/friends')
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
+    logger.setLevel(logging.DEBUG)
 else:
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    logger.handlers = gunicorn_logger.handlers
     logger.setLevel(gunicorn_logger.level)
