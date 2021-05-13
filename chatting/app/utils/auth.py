@@ -33,7 +33,7 @@ def get_user(db: Session, login_id: str):
     user = db.query(models.User).filter_by(login_id=login_id).first()
     if user:
         user_dict = jsonable_encoder(user)
-    return UserSchema(**user_dict)
+        return UserSchema(**user_dict)
 
 
 def create_token(data: UserPrivacySchema) -> Dict[str, UserToken]:
