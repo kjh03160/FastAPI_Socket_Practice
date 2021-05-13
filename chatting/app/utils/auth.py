@@ -58,7 +58,7 @@ def destroy_token(token: str) -> None:
     payload = decode_jwt(token)
     destroied_token_check(payload['username'])
     
-    expire_time = datetime.fromtimestamp(token)
+    expire_time = datetime.fromtimestamp(payload['exp'])
     remain_time = expire_time - datetime.now()
     
     redis.setex(f'{payload["username"]} expired: ', remain_time.seconds, token)
@@ -126,8 +126,8 @@ def decode_jwt(token: str = Depends(oauth2_scheme)):
     return payload
 
 
-def check_expired(token: str):
-    expire_time = datetime.fromtimestamp(token)
+def check_expired(exp: str):
+    expire_time = datetime.fromtimestamp(exp)
     if expire_time < datetime.now():
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
 

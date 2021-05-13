@@ -20,9 +20,9 @@ app.add_middleware(middleware.CORSMiddleware, allow_credentials=True, allow_head
 
 logging.basicConfig(format='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s', level=logging.INFO)
 sql_logger = logging.getLogger('sqlalchemy.engine')
-sql_logger.setLevel(logging.INFO)
 gunicorn_logger = logging.getLogger('gunicorn.error')
 logger.handlers =  sql_logger.handlers + gunicorn_logger.handlers
+logger.setLevel(logging.INFO)
 logger.info("-" * 10 + "Server Start" + "-" * 10 )
 
 
