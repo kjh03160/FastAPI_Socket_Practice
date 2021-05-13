@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta
 import os
+import pytz
+
+TZ_INFO = "Asia/Seoul"
+TIMEZONE = pytz.timezone(TZ_INFO)
 
 DEFAULT_DATABASES = {
     "USER": os.getenv('DB_USER'),
