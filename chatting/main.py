@@ -14,7 +14,7 @@ import uvicorn, json, starlette
 
 # app.add_middleware(middleware.AuthenticationMiddleware, backend=middleware.BasicAuthBackend())
 app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=["*"])
-app.add_middleware(middleware.CORSMiddleware, allow_credentials=True, allow_headers=["*"], allow_methods=["*"])
+app.add_middleware(middleware.CORSMiddleware, allow_headers=["*"], allow_methods=["*"])
 
 
 logs.server_logger.info("-" * 10 + "Server Start" + "-" * 10 )
