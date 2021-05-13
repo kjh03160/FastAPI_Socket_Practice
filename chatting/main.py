@@ -3,7 +3,6 @@ from fastapi import Depends, Path, Request, status, Response, WebSocket, \
 from fastapi.responses import HTMLResponse
 from starlette.endpoints import WebSocketEndpoint
 from fastapi.logger import logger
-
 from sqlalchemy.orm import Session
 
 from typing import List, Dict, AsyncIterable, Optional
@@ -19,10 +18,13 @@ import logging
 app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=["*"])
 app.add_middleware(middleware.CORSMiddleware, allow_credentials=True, allow_headers=["*"], allow_methods=["*"])
 
-logging.basicConfig(format='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.basicConfig(format='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s', level=logging.INFO)
+sql_logger = logging.getLogger('sqlalchemy.engine')
+sql_logger.setLevel(logging.INFO)
 gunicorn_logger = logging.getLogger('gunicorn.error')
-logger.handlers = gunicorn_logger.handlers
+logger.handlers =  sql_logger.handlers + gunicorn_logger.handlers
+logger.info("-" * 10 + "Server Start" + "-" * 10 )
+
 
 @app.on_event('startup')
 async def startup_event():
@@ -90,6 +92,5 @@ app.include_router(friend.router, prefix='/{user_id}/friends')
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-    logger.setLevel(logging.DEBUG)
 else:
     logger.setLevel(gunicorn_logger.level)
