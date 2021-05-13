@@ -78,7 +78,7 @@ def authenticate_user(db: Session, login_id: str, password: str):
     user = jsonable_encoder(user)
     access_jwt, refresh_jwt = create_token(UserPrivacySchema(**user))
     data = UserToken(access_token=access_jwt, refresh_token=refresh_jwt).dict()
-    data.update({'username': user['username']})
+    data.update({'username': user['username'], "user_id": user['id']})
     return data
 
 
