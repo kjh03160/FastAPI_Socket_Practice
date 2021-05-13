@@ -54,7 +54,7 @@ def create_token(data: UserPrivacySchema) -> Dict[str, UserToken]:
     return access_jwt, refresh_jwt
 
 
-def destroy_token(token: str) -> None:
+async def destroy_token(token: str) -> None:
     payload = decode_jwt(token)
     destroied_token_check(payload['username'], token)
     
