@@ -68,6 +68,14 @@ with open('index.html', 'r') as f:
 
 # https://bocadilloproject.github.io/guide/websockets.html#sending-messages
 
+@app.get("/")
+async def logging_check():
+    app.logger.debug("I'm a DEBUG message")
+    app.logger.info("I'm an INFO message")
+    app.logger.warning("I'm a WARNING message")
+    app.logger.error("I'm a ERROR message")
+    app.logger.critical("I'm a CRITICAL message")
+
 @app.get("/{id}")
 async def get(request: Request, id: int):
     # print(request.user)
@@ -77,6 +85,10 @@ app.include_router(message.router, prefix="/chat-room/{room_id}")
 app.include_router(chat_room.router)
 app.include_router(friend.router, prefix='/{user_id}/friends')
 
-
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+else:
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
