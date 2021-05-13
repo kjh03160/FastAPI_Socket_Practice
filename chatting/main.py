@@ -2,29 +2,22 @@ from fastapi import Depends, Path, Request, status, Response, WebSocket, \
                     BackgroundTasks, Body
 from fastapi.responses import HTMLResponse
 from starlette.endpoints import WebSocketEndpoint
-from fastapi.logger import logger
 from sqlalchemy.orm import Session
 
 from typing import List, Dict, AsyncIterable, Optional
 
-from app import schemas, crud, middleware
+from app import schemas, crud, middleware, logs
 from app.database import app, get_db_sess, open_database_connection_pools, close_database_connection_pools
 from app.connetion_manager import manager
 from app.apis import chat_room, user, message, friend
 import uvicorn, json, starlette
-import logging
 
 # app.add_middleware(middleware.AuthenticationMiddleware, backend=middleware.BasicAuthBackend())
 app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=["*"])
 app.add_middleware(middleware.CORSMiddleware, allow_credentials=True, allow_headers=["*"], allow_methods=["*"])
 
-logging.basicConfig(format='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s', level=logging.INFO)
-sql_logger = logging.getLogger('sqlalchemy.engine')
-gunicorn_logger = logging.getLogger('gunicorn.error')
-logger.handlers =  sql_logger.handlers + gunicorn_logger.handlers
-logger.setLevel(logging.INFO)
-logger.info("-" * 10 + "Server Start" + "-" * 10 )
 
+logs.server_logger.info("-" * 10 + "Server Start" + "-" * 10 )
 
 @app.on_event('startup')
 async def startup_event():
@@ -75,11 +68,12 @@ with open('index.html', 'r') as f:
 
 @app.get("/")
 async def logging_check():
-    logger.debug("I'm a DEBUG message")
-    logger.info("I'm an INFO message")
-    logger.warning("I'm a WARNING message")
-    logger.error("I'm a ERROR message")
-    logger.critical("I'm a CRITICAL message")
+    server_logger = logs.server_logger
+    server_logger.debug("I'm a DEBUG message")
+    server_logger.info("I'm an INFO message")
+    server_logger.warning("I'm a WARNING message")
+    server_logger.error("I'm a ERROR message")
+    server_logger.critical("I'm a CRITICAL message")
 
 @app.get("/{id}")
 async def get(request: Request, id: int):
@@ -92,5 +86,3 @@ app.include_router(friend.router, prefix='/{user_id}/friends')
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-else:
-    logger.setLevel(gunicorn_logger.level)

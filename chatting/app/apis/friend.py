@@ -12,7 +12,6 @@ from app.utils.auth import check_expired, get_user_id, get_current_user
 from app import schemas, crud, schemas, models
 
 import logging
-logger = logging.getLogger()
 
 router = InferringRouter(
     tags=["friends"],
