@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.param_functions import Query
 
 from sqlalchemy import case
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.attributes import flag_modified
 from typing import Dict
 
@@ -12,7 +12,7 @@ from app import models, schemas
 from app.utils import auth, pagination
 
 async def get_chatting_room_list(request: Request, db: Session, user_id: int):
-    user = await auth.get_user_obj_by_id(db, user_id)
+    user = db.query(models.User).options(joinedload('rooms')).get(user_id)
     chatting_rooms = user.rooms
     
     results = []
@@ -25,9 +25,9 @@ async def get_chatting_room_list(request: Request, db: Session, user_id: int):
 
 
 async def get_chatting_room_detail(request: Request, db: Session, room_id: int, user_id: int):
-    room = db.query(models.ChattingRoom).get(room_id)
+    room = db.query(models.ChattingRoom).options(joinedload('users')).get(room_id)
     if room:
-        return schemas.ChatRoomAbstract(**jsonable_encoder(room), users=[user.nickname for user in room.users])
+        return schemas.ChatRoomAbstract(**jsonable_encoder(room), users=[{'id': user.id, 'nickname': user.nickname} for user in room.users])
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
