@@ -15,7 +15,7 @@ import uvicorn, json, starlette
 
 
 # app.add_middleware(middleware.AuthenticationMiddleware, backend=middleware.BasicAuthBackend())
-app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=['localhost','127.0.0.1', '222.233.253.182', "3.209.175.156"])
+app.add_middleware(middleware.TrustedHostMiddleware, allowed_hosts=['localhost','127.0.0.1', '222.233.253.182'])
 app.add_middleware(middleware.CORSMiddleware, allow_headers=["*"], allow_methods=["*"], allow_origins=['http://localhost:3000'], allow_credentials=True)
 
 
