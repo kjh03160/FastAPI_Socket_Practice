@@ -38,5 +38,7 @@ async def get_user_privacy(db: Session, request: Request):
 async def refresh(refresh_token: str):
     return await refresh_expired_access_token(refresh_token)
 
+
+# TODO: How to destory refresh token?
 async def logout(request: Request, authorization: str) -> None:
     await destroy_token(authorization)

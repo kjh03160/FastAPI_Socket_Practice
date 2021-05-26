@@ -1,6 +1,13 @@
 from fastapi import WebSocket
 from app import schemas
+import json
+import pickle
 
+from app.utils import modules
+
+redis = modules.redis
+
+# TODO: Change the structure for distributed server(worker) -> use redis brocker
 class ConnectionManager:
     def __init__(self):
         self.connections: Dict[int, WebSocket] = {}
@@ -11,11 +18,12 @@ class ConnectionManager:
             self.connections[room_id].append(websocket)
         else:
             self.connections[room_id] = [websocket]
-        # redis.setex(client_id, 3600, json.dumps({"socket": websocket}))
 
     # async def broadcast(self, data: str):
     #     for connection in self.connections:
     #         await connection.send_text(data)
+    
+    # TODO: Consider room and message structure
     async def send_message(self, mine: WebSocket, data: schemas.MessageCreateSchema):
         sockets = self.connections[data['room_id']]
         # data['sender_id'], data['receiver']

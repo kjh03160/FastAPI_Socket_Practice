@@ -18,6 +18,7 @@ async def get_message_list(request: Request, db: Session, room_id: int, user_id:
     )
 
 
+# TODO: Consider this api is need
 async def create_message(reqeust: Request, db: Session, room_id: int, user_id: int, data: schemas.MessageCreateSchema):
     data.sender_id = user_id
     # data.receiver_id = receiver_id

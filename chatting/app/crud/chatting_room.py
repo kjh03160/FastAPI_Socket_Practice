@@ -40,6 +40,7 @@ async def create_chatting_room(reqeust: Request, db: Session, data: schemas.Crea
     return jsonable_encoder(chatroom)
 
 
+# TODO: Make deleted chattroom table and active col in chatroom table, mark not active(not delete), insert deleted room into it 
 async def delete_chatting_room(request: Request, db: Session, room_id: int):
     chatroom = db.query(models.ChattingRoom).get(room_id)
     db.delete(chatroom)
